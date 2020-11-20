@@ -59,8 +59,11 @@ app.get('/shoot', (req, res) => {
     }*/
 
     const schema = Joi.object({
-        play: Joi.string() .valid('rock', 'paper', 'scissors') .required(),
-        player_name: Joi.string() .required()
+        play: Joi.any()
+            .valid('rock', 'paper', 'scissors')
+            .required(),
+        player_name: Joi.any()
+            .required()
     });
 
     const validation = schema.validate(req.body);
