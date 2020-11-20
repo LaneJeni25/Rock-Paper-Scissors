@@ -170,3 +170,5 @@ const port = process.env.PORT || 5000; // Port Environment Variable
 app.listen(port, () => {
     console.log("Server up and running on port: " + port);
 });
+
+module.exports = validatePlay;
