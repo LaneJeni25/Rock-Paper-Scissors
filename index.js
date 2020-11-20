@@ -138,8 +138,8 @@ function validatePlay(data) {
  */
 function updateLeaderboard(playerName, outcome, res) {
     if (outcome === -1) {
-        db.none("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
-            "VALUES($1, 0, 1, 0) ON DUPLICATE KEY UPDATE losses = losses + 1",[playerName])
+        db.none("INSERT INTO leaderboard(player_name, wins, losses, ties) " +
+            "VALUES($1, 0, 1, 0) ON CONFLICT(player_name) DO UPDATE SET losses=losses+1",[playerName])
             .then(() => {
                 res.status(200).send(playerName + ' loses the round');
             }).catch((err) => {
@@ -149,8 +149,8 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else if (outcome === 0) {
-        db.none("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
-            "VALUES($1, 0, 0, 1) ON DUPLICATE KEY UPDATE ties = ties + 1",[playerName])
+        db.none("INSERT INTO leaderboard(player_name, wins, losses, ties) " +
+            "VALUES($1, 0, 0, 1) ON CONFLICT(player_name) DO UPDATE SET ties=ties+1",[playerName])
             .then(() => {
                 res.status(200).send(playerName + ' ties the round');
             }).catch((err) => {
@@ -160,8 +160,8 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else {
-        db.none("INSERT INTO Leaderboard (player_name, wins, losses, ties) " +
-            "VALUES($1, 1, 0, 0) ON DUPLICATE KEY UPDATE wins = wins + 1",[playerName])
+        db.none("INSERT INTO leaderboard(player_name, wins, losses, ties) " +
+            "VALUES($1, 1, 0, 0) ON CONFLICT(player_name) DO UPDATE SET wins=wins+1",[playerName])
             .then(() => {
                 res.status(200).send(playerName + ' wins the round');
             }).catch((err) => {
