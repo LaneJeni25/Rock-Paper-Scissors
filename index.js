@@ -67,7 +67,7 @@ app.get('/shoot', (req, res) => {
     });
 
     const validation = schema.validate(req.body);
-    res.send(validation);
+    res.send(validation.error.details[0].message);
     return;
 
     // Computer chooses play at random
