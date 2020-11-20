@@ -138,9 +138,9 @@ function validatePlay(data) {
  */
 function updateLeaderboard(playerName, outcome, res) {
     if (outcome === -1) {
-        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
+        db.none("BEGIN IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
                     + " UPDATE Leaderboard SET Losses = Losses + 1 WHERE PlayerName = $1"
-                    + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 1, 0)",
+                    + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 1, 0) END",
             [playerName])
             .then(() => {
                 res.status(200).send(playerName + ' loses the round');
@@ -151,9 +151,9 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else if (outcome === 0) {
-        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
+        db.none("BEGIN IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
             + " UPDATE Leaderboard SET Ties = Ties + 1 WHERE PlayerName = $1"
-            + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 0, 1)",
+            + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 0, 1) END",
             [playerName])
             .then(() => {
                 res.status(200).send(playerName + ' ties the round');
@@ -164,9 +164,9 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else {
-        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) " +
+        db.none("BEGIN IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) " +
             "UPDATE Leaderboard SET Wins = Wins + 1 WHERE PlayerName = $1 " +
-            "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 1, 0, 0)", [playerName])
+            "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 1, 0, 0) END", [playerName])
             .then(() => {
                 res.status(200).send(playerName + ' wins the round');
             }).catch((err) => {
