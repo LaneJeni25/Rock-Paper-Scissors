@@ -48,29 +48,15 @@ app.get('/', (req, res) => {
  * string that says "player_name" wins/loses/ties the round".
  */
 app.get('/shoot', (req, res) => {
-    let play = req.body['play'];
-    let playerName = req.body['player_name'];
-    console.log(play);
-    console.log(playerName);
+    let play = req.query['play'];
+    let playerName = req.query['player_name'];
 
     // Check if valid information was given for play and player_name
-    /*const { error } = validatePlay({play, playerName});
+    const { error } = validatePlay(req.query);
     if (error) {
         res.status(400).send(error.details[0].message)
         return;
-    }*/
-
-    const schema = Joi.object({
-        play: Joi.any()
-            .valid('rock', 'paper', 'scissors')
-            .required(),
-        player_name: Joi.any()
-            .required()
-    });
-
-    const validation = schema.validate(req.body);
-    res.send(validation.error.details[0].message);
-    return;
+    }
 
     // Computer chooses play at random
     let randomNum = Math.floor(Math.random() * choices.length);
