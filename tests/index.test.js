@@ -3,33 +3,28 @@
  * Carina Take-Home Interview
  * 11/18/2020
  */
-/*
- * Jeni Lane
- * Carina Take-Home Interview
- * 11/18/2020
- */
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 const app = require('../index.js');
 const supertest = require('supertest');
-const db = require("../utilities/sqlconn"); // Used to test HTTP requests/responses
-const request = supertest(app);
+const request = supertest(app); // Used to test HTTP requests/responses
+const db = require("../utilities/sqlconn.js");
 
 beforeAll(async () => {
-   await db.query("CREATE TABLE leaderboard (player_name TEXT UNIQUE PRIMARY KEY, " +
+   await db.none("CREATE TABLE leaderboard (player_name TEXT UNIQUE PRIMARY KEY, " +
        "wins INTEGER NOT NULL, losses INTEGER NOT NULL, ties INTEGER NOT NULL)");
 });
 
 beforeEach(async () => {
-   await db.query("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
+   await db.none("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
        "VALUES(Jim, 2, 1, 5)");
 });
 
 afterEach(async () => {
-   await db.query("DELETE FROM leaderboard");
+   await db.none("DELETE FROM leaderboard");
 });
 
 afterAll(async () => {
-   await db.query("DROP TABLE leaderboard");
+   await db.none("DROP TABLE leaderboard");
    db.end();
 });
 
