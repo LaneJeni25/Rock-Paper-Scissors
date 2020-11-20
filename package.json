@@ -2,7 +2,7 @@
   "name": "jenilane25-carina-interview",
   "version": "1.0.0",
   "description": "hands-on for creation of rest api for rock, paper, scissors game for carina take-home interview",
-  "main": "start.js",
+  "main": "index.js",
   "scripts": {
     "test": "jest"
   },
