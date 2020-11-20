@@ -1,9 +1,18 @@
-process.env.NODE_ENV = "test";
-const {db} = require("../utilities/sqlconn.js")
-
-const request = require("supertest"); // Used to test HTTP requests/responses
-
-const app = require("../index.js");
+/*
+ * Jeni Lane
+ * Carina Take-Home Interview
+ * 11/18/2020
+ */
+/*
+ * Jeni Lane
+ * Carina Take-Home Interview
+ * 11/18/2020
+ */
+process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+const app = require('../index.js');
+const supertest = require('supertest');
+const db = require("../utilities/sqlconn"); // Used to test HTTP requests/responses
+const request = supertest(app);
 
 beforeAll(async () => {
    await db.query("CREATE TABLE leaderboard (player_name TEXT UNIQUE PRIMARY KEY, " +
@@ -11,8 +20,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-    await db.query("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
-        "VALUES(Jim, 2, 1, 5)");
+   await db.query("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
+       "VALUES(Jim, 2, 1, 5)");
 });
 
 afterEach(async () => {
@@ -36,6 +45,7 @@ afterAll(async () => {
  *  - Matching plays are considered ties
  */
 
+//describe("GET /shoot Endpoint Tests", () => {});
 // Player Wins Tests
 //test("Returns win when player chooses rock and computer chooses scissors")
 
@@ -67,36 +77,38 @@ afterAll(async () => {
  *  - player_name: required
  */
 
-// Invalid Data Tests
-test("Returns error for invalid play query parameter", async () => {
-    const response = await request(app).get("/shoot?play=stick&player_name=Jim");
-    expect(response.body).toEqual("\"play\" must be one of [rock, paper, scissors]");
-    expect(response.statusCode).toBe(400);
+/*describe("Invalid Data Tests", () => {
+    test("Returns error for invalid play query parameter", async () => {
+        const response = await request(app).get("/shoot?play=stick&player_name=Jim");
+        expect(response.body).toEqual("\"play\" must be one of [rock, paper, scissors]");
+        expect(response.statusCode).toBe(400);
+    });
 });
 
-/*
+/!*
  * Tests for player_name having invalid data is not required at this time,
  * as the only requirement for this parameter currently is that it is not missing.
- */
+ *!/
 
-// Missing Data Tests
-test("Returns error for missing both query parameters", async () => {
-    const response = await request(app).get("/shoot");
-    expect(response.body).toEqual("\"play\" is required");
-    expect(response.statusCode).toBe(400);
-});
+describe("Missing Data Tests", () => {
+    test("Returns error for missing both query parameters", async () => {
+        const response = await request(app).get("/shoot");
+        expect(response.body).toEqual("\"play\" is required");
+        expect(response.statusCode).toBe(400);
+    });
 
-test("Returns error for missing play query parameters", async () => {
-    const response = await request(app).get("/shoot?player_name=Jim");
-    expect(response.body).toEqual("\"play\" is required");
-    expect(response.statusCode).toBe(400);
-});
+    test("Returns error for missing play query parameters", async () => {
+        const response = await request(app).get("/shoot?player_name=Jim");
+        expect(response.body).toEqual("\"play\" is required");
+        expect(response.statusCode).toBe(400);
+    });
 
-test("Returns error for missing player_name query parameters", async () => {
-    const response = await request(app).get("/shoot?play=rock");
-    expect(response.body).toEqual("\"player_name\" is required");
-    expect(response.statusCode).toBe(400);
-});
+    test("Returns error for missing player_name query parameters", async () => {
+        const response = await request(app).get("/shoot?play=rock");
+        expect(response.body).toEqual("\"player_name\" is required");
+        expect(response.statusCode).toBe(400);
+    });
+});*/
 
 
 /*
@@ -107,14 +119,17 @@ test("Returns error for missing player_name query parameters", async () => {
  *  - GET request for /leaderboard
  */
 
-describe("GET /leaderboard", () => {
-   test("The endpoint responds with an array of players and their current scores", async () => {
-      const response = await request(app).get("/leaderboard");
+
+describe("GET /leaderboard Endpoint", () => {
+   test("Gets the leaderboard endpoint", async done => {
+      const response = await request.get("/leaderboard");
+
       expect(response.body.length).toBe(1);
       expect(response.body[0]).toHaveProperty("player_name");
       expect(response.body[0]).toHaveProperty("wins");
       expect(response.body[0]).toHaveProperty("losses");
       expect(response.body[0]).toHaveProperty("ties");
       expect(response.statusCode).toBe(200);
+      done();
    });
 });

@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/LaneJeni25/Rock-Paper-Scissors#readme",
   "dependencies": {
+    "@jest/globals": "^26.6.2",
     "express": "^4.17.1",
     "joi": "^17.3.0",
     "pg-promise": "^10.8.0"
