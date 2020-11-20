@@ -33,6 +33,9 @@ afterAll(async () => {
  * Also simultaneously checks for valid query parameters and correctly-functioning
  * GET requests for /shoot.
  *
+ * Note: Currently Incomplete - tests should also check that leaderboard updates correctly,
+ * but this is not yet implemented
+ *
  * Game Rules:
  *  - rock beats scissors
  *  - scissors beats paper
@@ -40,29 +43,75 @@ afterAll(async () => {
  *  - Matching plays are considered ties
  */
 
-//describe("GET /shoot Endpoint Tests", () => {});
-// Player Wins Tests
-//test("Returns win when player chooses rock and computer chooses scissors")
+describe("GET /shoot Endpoint Tests", () => {
 
-//test("Returns win when player chooses scissors and computer chooses paper")
+   // Player Wins Tests
+   test("Returns win when player chooses rock and computer chooses scissors", async () => {
+      const response = await request.get("/shoot?play=rock&player_name=Jim");
 
-//test("Returns win when player chooses paper and computer chooses rock")
+      expect(response.body).toEqual("Jim wins the round");
+      expect(response.statusCode).toBe(200);
+   });
 
-// Player Loses Tests
-//test("Returns loss when player chooses scissors and computer chooses rock")
+   test("Returns win when player chooses scissors and computer chooses paper", async () => {
+      const response = await request.get("/shoot?play=scissors&player_name=Jim");
 
-//test("Returns loss when player chooses paper and computer chooses scissors")
+      expect(response.body).toEqual("Jim wins the round");
+      expect(response.statusCode).toBe(200);
+   });
 
-//test("Returns loss when player chooses rock and computer chooses paper")
+   test("Returns win when player chooses paper and computer chooses rock", async () => {
+      const response = await request.get("/shoot?play=paper&player_name=Jim");
+
+      expect(response.body).toEqual("Jim wins the round");
+      expect(response.statusCode).toBe(200);
+   });
+
+   // Player Loses Tests
+   test("Returns loss when player chooses scissors and computer chooses rock", async () => {
+      const response = await request.get("/shoot?play=scissors&player_name=Jim");
+
+      expect(response.body).toEqual("Jim loses the round");
+      expect(response.statusCode).toBe(200);
+   });
+
+   test("Returns loss when player chooses paper and computer chooses scissors", async () => {
+      const response = await request.get("/shoot?play=paper&player_name=Jim");
+
+      expect(response.body).toEqual("Jim loses the round");
+      expect(response.statusCode).toBe(200);
+   });
+
+   test("Returns loss when player chooses rock and computer chooses paper", async () => {
+      const response = await request.get("/shoot?play=rock&player_name=Jim");
+
+      expect(response.body).toEqual("Jim loses the round");
+      expect(response.statusCode).toBe(200);
+   });
 
 
-// Player Ties Tests
-//test("Returns tie for both players' choices being rock")
+   // Player Ties Tests
+   test("Returns tie for both players' choices being rock", async () => {
+      const response = await request.get("/shoot?play=rock&player_name=Jim");
 
-//test("Returns tie for both players' choices being scissors")
+      expect(response.body).toEqual("Jim ties the round");
+      expect(response.statusCode).toBe(200);
+   });
 
-//test("Returns tie for both players' choices being paper")
+   test("Returns tie for both players' choices being scissors", async () => {
+      const response = await request.get("/shoot?play=scissors&player_name=Jim");
 
+      expect(response.body).toEqual("Jim ties the round");
+      expect(response.statusCode).toBe(200);
+   });
+
+   test("Returns tie for both players' choices being paper", async () => {
+      const response = await request.get("/shoot?play=paper&player_name=Jim");
+
+      expect(response.body).toEqual("Jim ties the round");
+      expect(response.statusCode).toBe(200);
+   });
+});
 
 /*
  * Validation Tests for invalid and missing query parameters
@@ -72,38 +121,42 @@ afterAll(async () => {
  *  - player_name: required
  */
 
-/*describe("Invalid Data Tests", () => {
+describe("Invalid Data Tests", () => {
     test("Returns error for invalid play query parameter", async () => {
-        const response = await request(app).get("/shoot?play=stick&player_name=Jim");
+        const response = await request.get("/shoot?play=stick&player_name=Jim");
+
         expect(response.body).toEqual("\"play\" must be one of [rock, paper, scissors]");
         expect(response.statusCode).toBe(400);
     });
 });
 
-/!*
+/*
  * Tests for player_name having invalid data is not required at this time,
  * as the only requirement for this parameter currently is that it is not missing.
- *!/
+ */
 
 describe("Missing Data Tests", () => {
     test("Returns error for missing both query parameters", async () => {
-        const response = await request(app).get("/shoot");
+        const response = await request.get("/shoot");
+
         expect(response.body).toEqual("\"play\" is required");
         expect(response.statusCode).toBe(400);
     });
 
     test("Returns error for missing play query parameters", async () => {
-        const response = await request(app).get("/shoot?player_name=Jim");
+        const response = await request.get("/shoot?player_name=Jim");
+
         expect(response.body).toEqual("\"play\" is required");
         expect(response.statusCode).toBe(400);
     });
 
     test("Returns error for missing player_name query parameters", async () => {
-        const response = await request(app).get("/shoot?play=rock");
+        const response = await request.get("/shoot?play=rock");
+
         expect(response.body).toEqual("\"player_name\" is required");
         expect(response.statusCode).toBe(400);
     });
-});*/
+});
 
 
 /*
@@ -125,6 +178,5 @@ describe("GET /leaderboard Endpoint", () => {
       expect(response.body[0]).toHaveProperty("losses");
       expect(response.body[0]).toHaveProperty("ties");
       expect(response.statusCode).toBe(200);
-      done();
    });
 });
