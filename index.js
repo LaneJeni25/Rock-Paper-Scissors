@@ -63,117 +63,26 @@ app.get('/shoot', (req, res) => {
     let choice = choices[randomNum];
 
     // Compare player versus computer for win/loss/tie and update leaderboard
-    if (play === choice) {
-        res.status(200).send(playerName + ' ties the round');
-        db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Ties = Ties + 1", [playerName])
-            .then(() => {
-                res.send({
-                    success: true
-                });
-            }).catch((err) => {
-                res.send({
-                    success: false,
-                    error: err + " - Could not update leaderboard"
-                });
-        });
+    if (play === choice) { // player ties
+        updateLeaderboard(playerName, 0, res);
     } else {
         if (play === 'rock') { // if player chose rock
             if (choice === 'scissors') {
-                res.status(200).send(playerName + ' wins the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Wins = Wins + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, 1, res); // player wins
             } else {
-                res.status(200).send(playerName + ' loses the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Losses = Losses + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, -1, res); // player loses
             }
         } else if (play === 'scissors') { // if player chose paper
             if (choice === 'paper') {
-                res.status(200).send(playerName + ' wins the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Wins = Wins + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, 1, res);
             } else {
-                res.status(200).send(playerName + ' loses the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Losses = Losses + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, -1, res);
             }
         } else { // if player chose paper
             if (choice === 'rock') {
-                res.status(200).send(playerName + ' wins the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Wins = Wins + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, 1, res);
             } else {
-                res.status(200).send(playerName + ' loses the round');
-                db.none("INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) "
-                    + "VALUES($1, 0, 0, 0) ON DUPLICATE KEY UPDATE "
-                    + "Losses = Losses + 1", [playerName])
-                    .then(() => {
-                        res.send({
-                            success: true
-                        });
-                    }).catch((err) => {
-                    res.send({
-                        success: false,
-                        error: err + " - Could not update leaderboard"
-                    });
-                });
+                updateLeaderboard(playerName, -1, res);
             }
         }
     }
@@ -190,7 +99,7 @@ app.get('/leaderboard', (req, res) => {
     db.manyOrNone('SELECT * FROM leaderboard')
         .then((data) => {
             res.send({
-                names: data
+                leaderboard: data
             });
         }).catch((err) => {
             res.send({
@@ -216,6 +125,67 @@ function validatePlay(data) {
     });
 
     return schema.validate(data);
+}
+
+/*
+ * Given the corresponding value:
+ * -1 = loss
+ * 0 = tie
+ * 1 = win
+ *
+ * Send user corresponding message and
+ * update the leaderboard
+ */
+function updateLeaderboard(playerName, outcome, res) {
+    if (outcome === -1) {
+        res.status(200).send(playerName + ' loses the round');
+        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
+                    + " UPDATE Leaderboard SET Losses = Losses + 1 WHERE PlayerName = $1"
+                    + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 1, 0)",
+            [playerName])
+            .then(() => {
+                res.send({
+                    success: true
+                });
+            }).catch((err) => {
+            res.send({
+                success: false,
+                error: err + " - Could not update leaderboard"
+            });
+        });
+    } else if (outcome === 0) {
+        res.status(200).send(playerName + ' ties the round');
+        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
+            + " UPDATE Leaderboard SET Ties = Ties + 1 WHERE PlayerName = $1"
+            + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 0, 1)",
+            [playerName])
+            .then(() => {
+                res.send({
+                    success: true
+                });
+            }).catch((err) => {
+            res.send({
+                success: false,
+                error: err + " - Could not update leaderboard"
+            });
+        });
+    } else {
+        res.status(200).send(playerName + ' wins the round');
+        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
+            + " UPDATE Leaderboard SET Wins = Wins + 1 WHERE PlayerName = $1"
+            + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 1, 0, 0)",
+            [playerName])
+            .then(() => {
+                res.send({
+                    success: true
+                });
+            }).catch((err) => {
+            res.send({
+                success: false,
+                error: err + " - Could not update leaderboard"
+            });
+        });
+    }
 }
 
 
