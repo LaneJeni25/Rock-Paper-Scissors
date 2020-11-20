@@ -205,7 +205,9 @@ app.get('/leaderboard', (req, res) => {
  * Validates if player entered a valid choice of rock, paper, or scissors
  * and entered a name for themself.
  */
-function validatePlay(play) {
+function validatePlay(body) {
+    let choice = { play : body['play'], player_name : body['player_name']};
+
     const schema = Joi.object({
         play: Joi.string()
             .valid("rock", "paper", "scissors")
@@ -214,8 +216,8 @@ function validatePlay(play) {
         player_name: Joi.string()
             .required()
     });
-    
-    return schema.validate(play);
+
+    return schema.validate(choice);
 }
 
 
