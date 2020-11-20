@@ -138,15 +138,12 @@ function validatePlay(data) {
  */
 function updateLeaderboard(playerName, outcome, res) {
     if (outcome === -1) {
-        res.status(200).send(playerName + ' loses the round');
         db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
                     + " UPDATE Leaderboard SET Losses = Losses + 1 WHERE PlayerName = $1"
                     + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 1, 0)",
             [playerName])
             .then(() => {
-                res.send({
-                    success: true
-                });
+                res.status(200).send(playerName + ' loses the round');
             }).catch((err) => {
             res.send({
                 success: false,
@@ -154,15 +151,12 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else if (outcome === 0) {
-        res.status(200).send(playerName + ' ties the round');
         db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
             + " UPDATE Leaderboard SET Ties = Ties + 1 WHERE PlayerName = $1"
             + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 0, 0, 1)",
             [playerName])
             .then(() => {
-                res.send({
-                    success: true
-                });
+                res.status(200).send(playerName + ' ties the round');
             }).catch((err) => {
             res.send({
                 success: false,
@@ -170,15 +164,11 @@ function updateLeaderboard(playerName, outcome, res) {
             });
         });
     } else {
-        res.status(200).send(playerName + ' wins the round');
-        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) "
-            + " UPDATE Leaderboard SET Wins = Wins + 1 WHERE PlayerName = $1"
-            + "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 1, 0, 0)",
-            [playerName])
+        db.none("IF EXISTS (SELECT PlayerName FROM Leaderboard WHERE PlayerName = $1) " +
+            "UPDATE Leaderboard SET Wins = Wins + 1 WHERE PlayerName = $1 " +
+            "ELSE INSERT INTO Leaderboard (PlayerName, Wins, Losses, Ties) VALUES ($1, 1, 0, 0)", [playerName])
             .then(() => {
-                res.send({
-                    success: true
-                });
+                res.status(200).send(playerName + ' wins the round');
             }).catch((err) => {
             res.send({
                 success: false,
