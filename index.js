@@ -19,7 +19,7 @@ const choices = [
     'scissors'
 ]
 
-const db = require('./utilities/sqlconn.js'); // Heroku database variable endpoint
+const {db} = require('./utilities/sqlconn.js'); // Heroku database variable endpoint
 
 
 // Default Homepage Message

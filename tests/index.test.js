@@ -1,5 +1,5 @@
 process.env.NODE_ENV = "test";
-const db = require("../utilities/sqlconn.js")
+const {db} = require("../utilities/sqlconn.js")
 
 const request = require("supertest"); // Used to test HTTP requests/responses
 
