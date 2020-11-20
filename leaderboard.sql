@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS Leaderboard;
 
 CREATE TABLE Leaderboard (
-    PlayerName TEXT PRIMARY KEY,
+    PlayerName TEXT UNIQUE PRIMARY KEY,
     Wins INTEGER NOT NULL,
     Losses INTEGER NOT NULL,
     Ties INTEGER NOT NULL
