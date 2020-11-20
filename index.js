@@ -5,7 +5,7 @@
  */
 
 const express = require('express'); // Import express.js
-const joi = require('joi'); // Import joi
+const Joi = require('joi'); // Import Joi
 
 const app = express(); // Creates a new instance of an express application
 
@@ -206,11 +206,16 @@ app.get('/leaderboard', (req, res) => {
  * and entered a name for themself.
  */
 function validatePlay(play) {
-    const schema = {
-        play: joi.string().valid("rock", "paper", "scissors").required(),
-        player_name: joi.string().required()
-    };
-    return joi.validate(play, schema);
+    const schema = Joi.object({
+        play: Joi.string()
+            .valid("rock", "paper", "scissors")
+            .required(),
+
+        player_name: Joi.string()
+            .required()
+    });
+    
+    return schema.validate(play);
 }
 
 
