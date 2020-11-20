@@ -1,9 +1,33 @@
-//import {describe, test} from "@jest/globals";
+process.env.NODE_ENV = "test";
+const db = require("../utilities/sqlconn.js")
 
-const validatePlay = require("../index");
+const request = require("supertest"); // Used to test HTTP requests/responses
+
+const app = require("../index.js");
+
+beforeAll(async () => {
+   await db.query("CREATE TABLE leaderboard (player_name TEXT UNIQUE PRIMARY KEY, " +
+       "wins INTEGER NOT NULL, losses INTEGER NOT NULL, ties INTEGER NOT NULL)");
+});
+
+beforeEach(async () => {
+    await db.query("INSERT INTO leaderboard (player_name, wins, losses, ties) " +
+        "VALUES(Jim, 2, 1, 5)");
+});
+
+afterEach(async () => {
+   await db.query("DELETE FROM leaderboard");
+});
+
+afterAll(async () => {
+   await db.query("DROP TABLE leaderboard");
+   db.end();
+});
 
 /*
  * Game Rules Tests for all win, loss, and tie conditions
+ * Also simultaneously checks for valid query parameters and correctly-functioning
+ * GET requests for /shoot.
  *
  * Game Rules:
  *  - rock beats scissors
@@ -36,56 +60,61 @@ const validatePlay = require("../index");
 
 
 /*
- * Validation Tests for valid, invalid, and missing query parameters
+ * Validation Tests for invalid and missing query parameters
  *
  * Query Parameters:
- *  - play: required, must be a string, and can only be 'rock', 'paper', or 'scissors'
- *  - player_name: required, and must be a string
+ *  - play: required, can only be 'rock', 'paper', or 'scissors'
+ *  - player_name: required
  */
 
-// Valid Data Tests
-describe("ValidatePlay Function", () => {
-   test("Returns value for valid query parameters where play=rock", () => {
-      const input = { play: "rock", player_name: "Jim"};
-
-      const output = { value: { play: "rock", player_name: "Jim"}};
-
-      expect(validatePlay(input)).toBe(output);
-   });
-});
-
-describe("ValidatePlay Function", () => {
-   test("Returns value for valid query parameters where play=paper", () => {
-      const input = { play: "rock", player_name: "Jim"};
-
-      const output = { value: { play: "rock", player_name: "Jim"}};
-
-      expect(validatePlay(input)).toBe(output);
-   });
-});
-
-describe("ValidatePlay Function", () => {
-   test("Returns value for valid query parameters where play=scissors", () => {
-      const input = { play: "rock", player_name: "Jim"};
-
-      const output = { value: { play: "rock", player_name: "Jim"}};
-
-      expect(validatePlay(input)).toBe(output);
-   });
-});
-
-
 // Invalid Data Tests
-//test("Returns error for invalid query parameters")
+test("Returns error for invalid play query parameter", async () => {
+    const response = await request(app).get("/shoot?play=stick&player_name=Jim");
+    expect(response.body).toEqual("\"play\" must be one of [rock, paper, scissors]");
+    expect(response.statusCode).toBe(400);
+});
 
-//test("Returns error for invalid play query parameter but valid player_name")
-
-//test("Returns error for invalid player_name but valid play query parameter")
-
+/*
+ * Tests for player_name having invalid data is not required at this time,
+ * as the only requirement for this parameter currently is that it is not missing.
+ */
 
 // Missing Data Tests
-//test("Returns error for missing both query parameters")
+test("Returns error for missing both query parameters", async () => {
+    const response = await request(app).get("/shoot");
+    expect(response.body).toEqual("\"play\" is required");
+    expect(response.statusCode).toBe(400);
+});
 
-//test("Returns error for missing play query parameter")
+test("Returns error for missing play query parameters", async () => {
+    const response = await request(app).get("/shoot?player_name=Jim");
+    expect(response.body).toEqual("\"play\" is required");
+    expect(response.statusCode).toBe(400);
+});
 
-//test("Returns error for missing player_name query parameter")
+test("Returns error for missing player_name query parameters", async () => {
+    const response = await request(app).get("/shoot?play=rock");
+    expect(response.body).toEqual("\"player_name\" is required");
+    expect(response.statusCode).toBe(400);
+});
+
+
+/*
+ * HTTP REST Interface Tests
+ *
+ * Requests:
+ *  - GET request for /shoot (Tested in game rules section)
+ *  - GET request for /leaderboard
+ */
+
+describe("GET /leaderboard", () => {
+   test("The endpoint responds with an array of players and their current scores", async () => {
+      const response = await request(app).get("/leaderboard");
+      expect(response.body.length).toBe(1);
+      expect(response.body[0]).toHaveProperty("player_name");
+      expect(response.body[0]).toHaveProperty("wins");
+      expect(response.body[0]).toHaveProperty("losses");
+      expect(response.body[0]).toHaveProperty("ties");
+      expect(response.statusCode).toBe(200);
+   });
+});

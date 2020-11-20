@@ -25,7 +25,7 @@ const db = require('./utilities/sqlconn.js'); // Heroku database variable endpoi
 // Default Homepage Message
 app.get('/', (req, res) => {
    res.send('Welcome to the Carina Care Rock-Paper-Scissors Take-Home Interview!'
-   + '\nPlease choose rock, paper, or scissors and enter your player-name to start.');
+   + '\nPlease choose rock, paper, or scissors and enter your player_name to start.');
 });
 
 /*
@@ -171,4 +171,4 @@ app.listen(port, () => {
     console.log("Server up and running on port: " + port);
 });
 
-module.exports = validatePlay;
+module.exports = app;
