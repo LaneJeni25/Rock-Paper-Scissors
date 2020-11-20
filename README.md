@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Carina Care Take-Home Interview #
 ## Code by Jeni Lane ##
 #### Created November 2020 ####
