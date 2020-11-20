@@ -52,7 +52,7 @@ app.get('/shoot', (req, res) => {
     let playerName = req.body['player_name'];
 
     // Check if valid information was given for play and player_name
-    const { error } = validatePlay(req.body);
+    const { error } = validatePlay({play : play, player_name : playerName});
     if (error) {
         res.status(400).send(error.details[0].message)
         return;
@@ -205,9 +205,7 @@ app.get('/leaderboard', (req, res) => {
  * Validates if player entered a valid choice of rock, paper, or scissors
  * and entered a name for themself.
  */
-function validatePlay(body) {
-    let choice = { play : body['play'], player_name : body['player_name']};
-
+function validatePlay(choice) {
     const schema = Joi.object({
         play: Joi.string()
             .valid("rock", "paper", "scissors")
