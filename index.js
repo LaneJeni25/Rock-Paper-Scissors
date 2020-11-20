@@ -52,11 +52,20 @@ app.get('/shoot', (req, res) => {
     let playerName = req.body['player_name'];
 
     // Check if valid information was given for play and player_name
-    const { error } = validatePlay({play, playerName});
+    /*const { error } = validatePlay({play, playerName});
     if (error) {
         res.status(400).send(error.details[0].message)
         return;
-    }
+    }*/
+
+    const schema = Joi.object({
+        play: Joi.string() .valid('rock', 'paper', 'scissors') .required(),
+        player_name: Joi.string() .required()
+    });
+
+    const validation = schema.validate(req.body);
+    res.send(validation);
+    return;
 
     // Computer chooses play at random
     let randomNum = Math.floor(Math.random() * choices.length);
@@ -226,10 +235,3 @@ const port = process.env.PORT || 5000; // Port Environment Variable
 app.listen(port, () => {
     console.log("Server up and running on port: " + port);
 });
-
-/*
-    set up for local host
-
-const port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Listening on port ${port}..`));
-*/
