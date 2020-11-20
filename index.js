@@ -50,6 +50,8 @@ app.get('/', (req, res) => {
 app.get('/shoot', (req, res) => {
     let play = req.body['play'];
     let playerName = req.body['player_name'];
+    console.log(play);
+    console.log(playerName);
 
     // Check if valid information was given for play and player_name
     /*const { error } = validatePlay({play, playerName});
